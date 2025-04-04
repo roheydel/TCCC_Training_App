@@ -35,32 +35,43 @@ public sealed class SaveLoadSystem : MonoBehaviour
 
         var scenarioNameFixed = ScenarioNameInputField.text.Replace(' ', '_');
 
-        var scenarioFilePath = Path.Combine(_saveLoadDirectoryPath,
-            $"{scenarioNameFixed}.json");
+        //var scenarioFilePath = Path.Combine(_saveLoadDirectoryPath,
+        //    $"{_scenarioNameFixed}.json");
 
-        if (File.Exists(scenarioFilePath))
-        {
-            // popup warning message
-        }
-        else
-        {
-            using var fileStream = File.OpenWrite(scenarioFilePath);
-            using var writer = new StreamWriter(fileStream);
-            var dataJson = JsonConvert.SerializeObject(LoadSaveObject);
-            writer.Write(dataJson);
-        }
+        //if (File.Exists(scenarioFilePath))
+        //{
+        //    // popup warning message
+        //}
+        //else
+        //{
+        //using var fileStream = File.OpenWrite(scenarioFilePath);
+        //using var writer = new StreamWriter(fileStream);
+        var dataJson = JsonConvert.SerializeObject(LoadSaveObject);
+        //writer.Write(dataJson);
+        var savedFiles = PlayerPrefs.GetString("fileNames") + scenarioNameFixed + ";";
+        PlayerPrefs.SetString("fileNames", savedFiles);
+        PlayerPrefs.SetString(scenarioNameFixed, dataJson);
+        PlayerPrefs.Save();
+        //}
     }
 
     public void Load()
     {
         var selectedFileName = SavedScenariosDropdown.options[SavedScenariosDropdown.value].text;
-        var loadPath = Path.Combine(_saveLoadDirectoryPath, selectedFileName);
+        //var loadPath = Path.Combine(_saveLoadDirectoryPath, selectedFileName);
 
-        if (File.Exists(loadPath))
+        //if (File.Exists(loadPath))
+        //{
+        //    using var fileStream = File.OpenRead(loadPath);
+        //    using var reader = new StreamReader(fileStream);
+        //    LoadSaveObject = JsonConvert.DeserializeObject<LoadSaveData>(reader.ReadToEnd());
+        //    OnLoadGlobalEvent?.Invoke(this);
+        //}
+        //else
+        if (PlayerPrefs.HasKey(selectedFileName))
         {
-            using var fileStream = File.OpenRead(loadPath);
-            using var reader = new StreamReader(fileStream);
-            LoadSaveObject = JsonConvert.DeserializeObject<LoadSaveData>(reader.ReadToEnd());
+            var save = PlayerPrefs.GetString(selectedFileName);
+            LoadSaveObject = JsonConvert.DeserializeObject<LoadSaveData>(save);
             OnLoadGlobalEvent?.Invoke(this);
         }
     }
@@ -69,10 +80,11 @@ public sealed class SaveLoadSystem : MonoBehaviour
     {
         SavedScenariosDropdown.ClearOptions();
 
-        var dirInfo = new DirectoryInfo(_saveLoadDirectoryPath);
-        var savedFiles = dirInfo.GetFiles();
+        //var dirInfo = new DirectoryInfo(_saveLoadDirectoryPath);
+        //var savedFiles = dirInfo.GetFiles();
+        var savedFiles = PlayerPrefs.GetString("fileNames").Split(';').ToList();
         var optionsData = savedFiles
-            .Select(x => new TMP_Dropdown.OptionData { text = x.Name, })
+            .Select(x => new TMP_Dropdown.OptionData { text = x })
             .ToList();
         SavedScenariosDropdown.AddOptions(optionsData);
     }
